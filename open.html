@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'sha256-NfmDSKQReqpBIPJUGTixGnurM2aTevv9jB9X3GWmszA='">
+<title>Opening email…</title>
+<style>
+  body { font: 16px/1.5 -apple-system, BlinkMacSystemFont, sans-serif; margin: 40px 16px; }
+  @media (prefers-color-scheme: dark) { body { background: #141416; color: #ececec; } a { color: #8ab4f8; } }
+</style>
+</head>
+<body>
+<p id="status">Opening your email…</p>
+<p id="links" hidden><a id="mail">Open in Apple Mail</a> · <a id="gmail">Open in Gmail</a></p>
+<script>
+  const p = new URLSearchParams(location.hash.slice(1));
+  const m = p.get('m') || '', g = p.get('g') || '', u = p.get('u') || '';
+  // Accept only what a real link from inbox-server contains, so this page can never send you anywhere else.
+  const ok = /^[^\s<>]{1,250}@[^\s<>]{1,250}$/.test(m) && /^[0-9a-f]{8,24}$/.test(g) && /^[^\s@]+@[^\s@]+$/.test(u);
+  if (!ok) {
+    document.getElementById('status').textContent = "This link isn't one inbox-server made.";
+  } else {
+    const mail = 'message://' + encodeURIComponent('<' + m + '>');
+    const gmail = 'https://mail.google.com/mail/u/?authuser=' + encodeURIComponent(u) + '#all/' + g;
+    document.getElementById('mail').href = mail;
+    document.getElementById('gmail').href = gmail;
+    document.getElementById('links').hidden = false;
+    const apple = /iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent);
+    document.getElementById('status').textContent = 'Opening it in ' + (apple ? 'Apple Mail' : 'Gmail') + '…';
+    location.replace(apple ? mail : gmail);
+  }
+</script>
+</body>
+</html>
